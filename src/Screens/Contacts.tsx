@@ -66,7 +66,7 @@ const ContactsScreen = ({ navigation }: any) => {
 
   const addContact = (name: string, mobile: string) => {
     if (!name.trim() || !mobile.trim()) {
-      VibrationUtils.vibrateError(); // Error feedback
+      VibrationUtils.vibrateError(); 
       Alert.alert('Error', 'Please fill in both name and phone number');
       return;
     }
@@ -77,18 +77,16 @@ const ContactsScreen = ({ navigation }: any) => {
         [name.trim(), mobile.trim()],
         result => {
           console.log('User added successfully:', result);
-          VibrationUtils.vibrateSuccess(); // Success feedback
-          // Reset form
+          VibrationUtils.vibrateSuccess();
           setNewContactName('');
           setNewContactPhone('');
           setShowAddModal(false);
-          // Reload contacts to show the new contact
           getContacts();
           Alert.alert('Success', 'Contact added successfully');
         },
         error => {
           console.error('Error adding user:', error);
-          VibrationUtils.vibrateError(); // Error feedback
+          VibrationUtils.vibrateError();
           Alert.alert('Error', 'Failed to add contact');
         },
       );
@@ -96,7 +94,7 @@ const ContactsScreen = ({ navigation }: any) => {
   };
 
   const deleteContact = (id: any) => {
-    VibrationUtils.vibrateNotification(); // Add haptic feedback
+    VibrationUtils.vibrateNotification();
     Alert.alert(
       'Delete Contact',
       'Are you sure you want to remove this contact?',
@@ -112,8 +110,7 @@ const ContactsScreen = ({ navigation }: any) => {
                 [id],
                 result => {
                   console.log('Contact deleted successfully:', result);
-                  VibrationUtils.vibrateSuccess(); // Success feedback
-                  // Remove from local state
+                  VibrationUtils.vibrateSuccess();
                   setContacts(
                     contacts.filter((contact: any) => contact.id !== id),
                   );
@@ -121,7 +118,7 @@ const ContactsScreen = ({ navigation }: any) => {
                 },
                 error => {
                   console.error('Error deleting contact:', error);
-                  VibrationUtils.vibrateError(); // Error feedback
+                  VibrationUtils.vibrateError();
                   Alert.alert('Error', 'Failed to delete contact');
                 },
               );
