@@ -32,7 +32,6 @@ export const AuthProvider = ({ children }: any) => {
             console.log('Database opened successfully');
             setDb(database);
             
-            // Create table after database is opened
             database.transaction(
               (tx: any) => {
                 tx.executeSql(

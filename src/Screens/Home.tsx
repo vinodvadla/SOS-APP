@@ -9,8 +9,11 @@ import {
   Alert
 } from 'react-native';
 import { VibrationUtils } from '../utils/VibrationUtils';
+import { SendDirectSms } from 'react-native-send-direct-sms';
+import { useAuth } from '../AuthContex';
 
 const Home = ({navigation}:any) => {
+  const { db } = useAuth();
   const [isPressed, setIsPressed] = useState(false);
   const [pulseAnim] = useState(new Animated.Value(1));
   const [countdown, setCountdown] = useState<number|null>(null);
@@ -18,6 +21,16 @@ const Home = ({navigation}:any) => {
   
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const autoCancelTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+
+
+
+  function sendSmsData(mobileNumber:string, bodySMS:string) {
+    SendDirectSms("+91"+mobileNumber, bodySMS)
+      .then((res) => console.log("then", res))
+      .catch((err) => console.log("catch", err))
+  }
+
 
   useEffect(() => {
     const pulseAnimation = Animated.loop(
@@ -116,6 +129,9 @@ const Home = ({navigation}:any) => {
     
     VibrationUtils.vibrateSOS();
     
+    // Send SMS to emergency contacts
+    sendEmergencySMS();
+    
     Alert.alert(
       'SOS Activated!',
       'Emergency alert has been sent to your contacts.',
@@ -132,10 +148,43 @@ const Home = ({navigation}:any) => {
     );
   };
 
+  const sendEmergencySMS = () => {
+    // Get selected contacts from database and send SMS
+    if (!db) {
+      console.error('Database not available');
+      return;
+    }
+
+    db.transaction((tx: any) => {
+      tx.executeSql(
+        'SELECT * FROM Contacts',
+        [],
+        (tx: any, result: any) => {
+          if (result && result.rows && result.rows.length > 0) {
+            const selectedContacts = result.rows.raw();
+            console.log('Selected contacts for SMS:', selectedContacts);
+            
+            selectedContacts.forEach((contact: any) => {
+              const messageBody = `🚨 EMERGENCY SOS ALERT 🚨\n\nThis is an emergency alert from ${contact.name || 'your emergency contact'}.\n\nI need immediate assistance. Please respond or call emergency services if needed.\n\nLocation: [GPS coordinates will be added]\nTime: ${new Date().toLocaleString()}`;
+              
+              sendSmsData(contact.mobile, messageBody);
+            });
+          } else {
+            console.log('No selected contacts found');
+          }
+        },
+        (error: any) => {
+          console.error('Error fetching selected contacts:', error);
+        },
+      );
+    });
+  };
+
   const navigateToContacts = () => {
     VibrationUtils.vibrateNotification();
     navigation.navigate("Contacts");
   };
+  
 
   return (
     <View style={styles.container}>
